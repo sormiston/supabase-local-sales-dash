@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:diff": "supabase db diff -f",
+    "db:generate-seed": "supabase db dump --local --data-only -s public -f supabase/seed.sql"
   },
   "dependencies": {
     "react": "^19.2.8",
