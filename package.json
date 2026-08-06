@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "start": "supabase start",
+    "stop": "supabase stop",
     "db:diff": "supabase db diff -f",
     "db:generate-seed": "supabase db dump --local --data-only -s public -f supabase/seed.sql"
   },
