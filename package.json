@@ -12,21 +12,25 @@
     "stop": "supabase stop",
     "db:diff": "supabase db diff -f",
     "db:generate-seed": "supabase db dump --local --data-only -s public -f supabase/seed.sql",
+    "db:generate-types": "supabase gen types typescript --local --schema public > src/lib/database.types.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.2",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
     "supabase": "^2.111.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vitest": "^4.1.10"

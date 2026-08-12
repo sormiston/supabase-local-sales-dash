@@ -79,3 +79,63 @@ Confirmed decisions:
 #### Files changed
 - New: `supabase/migrations/20260811010000_grant_select_sales.sql`, `.env.example`, `.env.test`, `src/lib/supabaseClient.ts`, `tsconfig.test.json`, `vitest.config.ts`, `tests/salesDeals.test.ts`, `tests/salesByName.test.ts`
 - Modified: `package.json`, `pnpm-lock.yaml`, `tsconfig.app.json`, `tsconfig.json`, `vite.config.ts`
+
+## 2026-08-11 — Homepage: header + sales-by-name bar chart
+
+### Context
+
+This is the app's first real screen. Before this work, `src/App.tsx` was still the unmodified Vite+React starter template (counter button, Vite/React logos, doc links) — no Tailwind, no chart library, no app-specific components existed. `src/lib/supabaseClient.ts` (from a prior session) already provided a working `supabase` client reading `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLISHABLE_KEY`, and the `public.sales_by_name` view (columns: `name`, `total_value`, `deal_count`) was already readable via the REST API (grants fixed in an earlier session).
+
+The homepage needed an app header titled **"Supabase Local Sales Dash"** and a bar chart of `sales_by_name`, styled with TailwindCSS.
+
+Confirmed decisions:
+- **Chart library: Recharts** — built natively for React web (JSX API, SVG), ~48.9M weekly downloads, solid TS types, React 19 compatible, ~150kB. (Ruled out shadcn/ui Charts — a themed Recharts wrapper requiring the shadcn CLI/component setup — and Nivo — heavier bundle, less JSX-native API.)
+- **Chart shows `total_value` only**, one bar per name. `deal_count` surfaces in the hover tooltip as supporting detail rather than a second bar/axis.
+- **TailwindCSS v4**, installed via the `@tailwindcss/vite` plugin (CSS-first config, no `postcss.config.js`/`tailwind.config.js`).
+
+Built following the loaded `dataviz` skill's procedure: single-measure categorical bar chart, color from the validated palette (one accent hue, no legend needed for a single series), mark specs (rounded bar ends, recessive gridlines), hover tooltip by default, and a final accessibility pass (accessible data table alongside the chart, dark-mode-aware colors validated against both surfaces).
+
+### Implementation (as built)
+
+#### 1. Dependencies
+```
+pnpm add recharts
+pnpm add -D tailwindcss @tailwindcss/vite
+```
+Installed clean — Recharts 3.10.1 resolved against React 19.2.8 with **no peer-dependency warning**, so the planned `react-is` override fallback wasn't needed.
+
+#### 2. Tailwind v4
+- `vite.config.ts`: added `tailwindcss()` alongside `react()` in the plugins array.
+- `src/index.css`: replaced the starter CSS with `@import "tailwindcss";` plus a `@theme` block of color tokens taken from the `dataviz` skill's `references/palette.md`, with a `prefers-color-scheme: dark` override block redefining the same custom properties. Tokens used: `--color-page`, `--color-surface`, `--color-ink-primary`, `--color-ink-secondary`, `--color-ink-muted`, `--color-gridline`, `--color-axis`, `--color-series-1` (categorical slot 1 "blue": `#2a78d6` light / `#3987e5` dark), `--color-border`.
+- Deleted `src/App.css` and the unused starter assets (`react.svg`, `vite.svg`, `hero.png`) from `src/assets/`.
+- `index.html` `<title>` updated to `Supabase Local Sales Dash`.
+
+#### 3. Supabase TypeScript types
+- Added `"db:generate-types": "supabase gen types typescript --local --schema public > src/lib/database.types.ts"` to `package.json`.
+- `src/lib/supabaseClient.ts` updated to `createClient<Database>(...)`.
+
+#### 4. Data-fetching hook
+`src/hooks/useSalesByName.ts` — `useEffect`/`useState` hook wrapping `supabase.from('sales_by_name').select('*').order('total_value', { ascending: false })`, returning `{ data, loading, error }`, typed via `Database['public']['Views']['sales_by_name']['Row']`. Guards against race fetches and dedeupes state settings via `AbortController` pattern: `signal` is passed to the query via `.abortSignal(...)`, and the effect's cleanup calls `controller.abort()`, so the underlying `fetch` is cancelled.
+
+#### 5. Components
+- `src/components/AppHeader.tsx` — Tailwind-styled header bar with the app title.
+- `src/components/SalesByNameChart.tsx` — `ResponsiveContainer` > `BarChart`: hairline `CartesianGrid` (horizontal only), `XAxis`/`YAxis` styled with muted/axis tokens, `Bar dataKey="total_value"` filled with `var(--color-series-1)`, `radius={[4,4,0,0]}` (rounded top, square baseline), `maxBarSize={24}`, direct value labels via `LabelList` (comma-formatted, ink-secondary color — text never wears the series color), custom `Tooltip` content (value bold/primary, name secondary, deal count muted) with a light hover-cursor wash. Loading/error/empty states handled inline.
+
+#### 6. Homepage composition
+`src/App.tsx` rewritten to render `<AppHeader />` then a `<main>` containing a "Sales by name" heading and `<SalesByNameChart />`, laid out with Tailwind (`min-h-screen bg-page`, centered `max-w-5xl` container, padding). `src/main.tsx` unchanged.
+
+### Verification results
+1. **Palette validation** (`node scripts/validate_palette.js`) — `#2a78d6` on light surface `#fcfcfb` and `#3987e5` on dark surface `#1a1a19`: **ALL CHECKS PASS** in both modes.
+2. `pnpm exec tsc -b` — clean (after the `LabelList` formatter type fix above).
+3. `pnpm lint` (oxlint) — clean.
+4. `pnpm test` — 3/3 existing Vitest tests still pass, unaffected.
+5. `pnpm build` — succeeds; one non-blocking warning that the main JS chunk is ~759kB (mostly Recharts) — not addressed, noted as a future code-splitting candidate if it becomes a problem.
+6. Dev server smoke check: confirmed `index.html` serves the correct `<title>`, and `main.tsx`/`App.tsx`/`SalesByNameChart.tsx` all transform without error through Vite.
+   - **Gap**: this environment has no `chromium-cli` or `claude-in-chrome` available, so the chart was **not visually screenshotted/confirmed in an actual browser** during the original build — only static/compile-time checks were run.
+
+
+#### Files changed
+- New: `src/lib/database.types.ts`, `src/hooks/useSalesByName.ts`, `src/components/AppHeader.tsx`, `src/components/SalesByNameChart.tsx`, `.env.local`
+- Modified: `package.json`, `pnpm-lock.yaml`, `vite.config.ts`, `src/index.css`, `index.html`, `src/lib/supabaseClient.ts`, `src/App.tsx`
+- Deleted: `src/App.css`, `src/assets/react.svg`, `src/assets/vite.svg`, `src/assets/hero.png`
+
