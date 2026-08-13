@@ -26,12 +26,12 @@ function ChartTooltip({ active, payload }: ChartTooltipProps) {
   const row = payload[0].payload
 
   return (
-    <div className="rounded-md border border-border bg-surface px-3 py-2 shadow-sm">
-      <p className="text-sm text-ink-secondary">{row.name}</p>
-      <p className="text-base font-semibold text-ink-primary">
+    <div className="border-border bg-surface rounded-md border px-3 py-2 shadow-sm">
+      <p className="text-ink-secondary text-sm">{row.name}</p>
+      <p className="text-ink-primary text-base font-semibold">
         {numberFormatter.format(row.total_value ?? 0)}
       </p>
-      <p className="text-xs text-ink-muted">
+      <p className="text-ink-muted text-xs">
         {row.deal_count} {row.deal_count === 1 ? 'deal' : 'deals'}
       </p>
     </div>
@@ -42,26 +42,22 @@ export function SalesByNameChart() {
   const { data, loading, error } = useSalesByName()
 
   if (loading) {
-    return <p className="text-sm text-ink-secondary">Loading sales data…</p>
+    return <p className="text-ink-secondary text-sm">Loading sales data…</p>
   }
 
   if (error) {
-    return <p className="text-sm text-ink-secondary">Couldn't load sales data: {error}</p>
+    return <p className="text-ink-secondary text-sm">Couldn't load sales data: {error}</p>
   }
 
   if (data.length === 0) {
-    return <p className="text-sm text-ink-secondary">No sales data yet.</p>
+    return <p className="text-ink-secondary text-sm">No sales data yet.</p>
   }
 
   return (
-    <div className="h-80 w-full rounded-lg border border-border bg-surface p-4">
+    <div className="border-border bg-surface h-80 w-full rounded-lg border p-4">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 24, right: 8, left: 8, bottom: 8 }}>
-          <CartesianGrid
-            vertical={false}
-            stroke="var(--color-gridline)"
-            strokeDasharray="0"
-          />
+          <CartesianGrid vertical={false} stroke="var(--color-gridline)" strokeDasharray="0" />
           <XAxis
             dataKey="name"
             tickLine={false}
