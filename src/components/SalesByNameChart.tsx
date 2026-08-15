@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { useSalesByName } from '@/hooks/useSalesByName'
 import type { Database } from '@/lib/database.types'
 
 type SalesByNameRow = Database['public']['Views']['sales_by_name']['Row']
@@ -38,9 +37,13 @@ function ChartTooltip({ active, payload }: ChartTooltipProps) {
   )
 }
 
-export function SalesByNameChart() {
-  const { data, loading, error } = useSalesByName()
+interface SalesByNameChartProps {
+  data: SalesByNameRow[]
+  loading: boolean
+  error: string | null
+}
 
+export function SalesByNameChart({ data, loading, error }: SalesByNameChartProps) {
   if (loading && data.length === 0) {
     return <p className="text-ink-secondary text-sm">Loading sales data…</p>
   }
