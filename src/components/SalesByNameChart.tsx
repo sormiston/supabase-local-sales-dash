@@ -41,7 +41,7 @@ function ChartTooltip({ active, payload }: ChartTooltipProps) {
 export function SalesByNameChart() {
   const { data, loading, error } = useSalesByName()
 
-  if (loading) {
+  if (loading && data.length === 0) {
     return <p className="text-ink-secondary text-sm">Loading sales data…</p>
   }
 

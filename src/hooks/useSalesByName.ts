@@ -16,19 +16,23 @@ export function useSalesByName(): UseSalesByNameResult {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const controller = new AbortController()
+    let cancelled = false
+    let currentController: AbortController | null = null
 
     async function fetchSalesByName() {
+      currentController?.abort()
+      const controller = new AbortController()
+      currentController = controller
+
       setLoading(true)
       setError(null)
 
       const { data: rows, error: fetchError } = await supabase
         .from('sales_by_name')
         .select('*')
-        .order('total_value', { ascending: false })
         .abortSignal(controller.signal)
 
-      if (controller.signal.aborted) return
+      if (controller.signal.aborted || cancelled) return
 
       if (fetchError) {
         setError(fetchError.message)
@@ -40,8 +44,26 @@ export function useSalesByName(): UseSalesByNameResult {
 
     fetchSalesByName()
 
+    const channel = supabase
+      .channel('sales-deals-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'sales_deals' },
+        () => {
+          fetchSalesByName()
+        },
+      )
+      .subscribe((status) => {
+        if (cancelled) return
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setError('Lost connection to live sales updates.')
+        }
+      })
+
     return () => {
-      controller.abort()
+      cancelled = true
+      currentController?.abort()
+      supabase.removeChannel(channel)
     }
   }, [])
 
