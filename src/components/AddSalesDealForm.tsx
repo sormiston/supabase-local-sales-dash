@@ -12,9 +12,10 @@ const initialState: FormState = { error: null }
 
 interface AddSalesDealFormProps {
   data: SalesByNameRow[]
+  loading: boolean
 }
 
-export function AddSalesDealForm({ data }: AddSalesDealFormProps) {
+export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
   const repNames = Array.from(
     new Set(data.map((row) => row.name).filter((name): name is string => Boolean(name))),
   ).sort((a, b) => a.localeCompare(b))
@@ -43,7 +44,7 @@ export function AddSalesDealForm({ data }: AddSalesDealFormProps) {
 
   const [state, formAction, isPending] = useActionState(addDeal, initialState)
 
-  if (repNames.length === 0) {
+  if (!loading && repNames.length === 0) {
     return (
       <div className="border-border bg-surface rounded-lg border p-4">
         <p className="text-ink-secondary text-sm">

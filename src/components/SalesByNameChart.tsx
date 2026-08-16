@@ -44,16 +44,17 @@ interface SalesByNameChartProps {
 }
 
 export function SalesByNameChart({ data, loading, error }: SalesByNameChartProps) {
-  if (loading && data.length === 0) {
-    return <p className="text-ink-secondary text-sm">Loading sales data…</p>
-  }
+  console.log('data, loading, error: ', data, loading, error);
+  // if (loading && data.length === 0) {
+  //   return <p className="text-ink-secondary text-sm h-80 w-full">Loading sales data…</p>
+  // }
 
   if (error) {
-    return <p className="text-ink-secondary text-sm">Couldn't load sales data: {error}</p>
+    return <p className="text-ink-secondary text-sm h-80 w-full">Couldn't load sales data: {error}</p>
   }
 
-  if (data.length === 0) {
-    return <p className="text-ink-secondary text-sm">No sales data yet.</p>
+  if (!loading && data.length === 0) {
+    return <p className="text-ink-secondary text-sm h-80 w-full">No sales data yet.</p>
   }
 
   return (

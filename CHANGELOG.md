@@ -43,3 +43,15 @@
 - `src/components/AddSalesDealForm.tsx`: an uncontrolled form built on React 19's `useActionState` — no field-level `useState`. The rep dropdown is derived from the same `sales_by_name` rows already fetched (no separate query). The action validates rep selection and a positive integer value before inserting into `sales_deals`.
 - `useSalesByName()` is now called once in `App`, which passes `data`/`loading`/`error` down as props to both `SalesByNameChart` (now presentational) and `AddSalesDealForm`, avoiding duplicate fetches and duplicate realtime channels.
 - `supabase/migrations/20260815191143_grant_insert_sales_deals.sql`: grants `INSERT` on `sales_deals` to `anon`/`authenticated`, which was missing and blocked every submission.
+
+## 2026-08-16 — Supabase email/password login, route guards, and demo auth seed (`1f6e667`)
+
+**Objective:** Gate the dashboard behind Supabase Auth email/password sign-in, and make the local seed reproduce working demo accounts alongside the existing sales data.
+
+**Implementation:**
+- `react-router-dom` introduced in `src/main.tsx`/`src/App.tsx` (`BrowserRouter`, nested `Route`s); the dashboard content moves out of `App.tsx` into `src/pages/Dashboard.tsx`, with `src/pages/Login.tsx` as the new `/` route.
+- `src/context/AuthContext.tsx`: a single `AuthProvider`/`useAuth()` context wrapping `supabase.auth.getSession()` + `onAuthStateChange`, shared by every consumer instead of each subscribing independently.
+- `src/components/RequireAuth.tsx` / `RequireGuest.tsx`: layout-route guards (`<Outlet/>` vs `<Navigate/>`) so `/dashboard` and `/` never mount the wrong page before redirecting — avoids a login-screen flash for users who are already authenticated.
+- `src/pages/Login.tsx`: a `useActionState` form (mirroring `AddSalesDealForm`'s pattern) calling `supabase.auth.signInWithPassword`. `src/components/AppHeader.tsx` now shows the signed-in user's email and a sign-out control.
+- `AddSalesDealForm`/`SalesByNameChart`/`useSalesByName` take a `loading` flag so the "no reps yet" / "no sales data yet" empty states don't flash before the initial fetch resolves.
+- `supabase/seed.sql` and `package.json`'s `db:generate-seed`: the dump now includes `-s public,auth` with every ephemeral/session `auth.*` table (tokens, MFA, SSO, audit log, etc.) excluded, so `supabase db reset` reseeds two demo accounts (`alice@salesdash.com`, `john@salesdash.com`) alongside the sales data.

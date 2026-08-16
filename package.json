@@ -12,8 +12,8 @@
     "preview": "vite preview",
     "start": "supabase start",
     "stop": "supabase stop",
-    "db:diff": "supabase db diff -f",
-    "db:generate-seed": "supabase db dump --local --data-only -s public -f supabase/seed.sql",
+    "db:diff": "supabase db diff",
+    "db:generate-seed": "supabase db dump --local --data-only -s public,auth -x auth.audit_log_entries -x auth.flow_state -x auth.identities -x auth.instances -x auth.mfa_amr_claims -x auth.mfa_challenges -x auth.mfa_factors -x auth.one_time_tokens -x auth.refresh_tokens -x auth.saml_providers -x auth.saml_relay_states -x auth.schema_migrations -x auth.sessions -x auth.sso_domains -x auth.sso_providers -x auth.oauth_clients -x auth.oauth_authorizations -x auth.oauth_consents -x auth.oauth_client_states -x auth.custom_oauth_providers -x auth.webauthn_credentials -x auth.webauthn_challenges -f supabase/seed.sql",
     "db:generate-types": "supabase gen types typescript --local --schema public > src/lib/database.types.ts",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -22,6 +22,7 @@
     "@supabase/supabase-js": "^2.112.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1"
   },
   "devDependencies": {

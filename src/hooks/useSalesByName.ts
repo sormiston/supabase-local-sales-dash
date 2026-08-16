@@ -46,13 +46,9 @@ export function useSalesByName(): UseSalesByNameResult {
 
     const channel = supabase
       .channel('sales-deals-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'sales_deals' },
-        () => {
-          fetchSalesByName()
-        },
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sales_deals' }, () => {
+        fetchSalesByName()
+      })
       .subscribe((status) => {
         if (cancelled) return
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
