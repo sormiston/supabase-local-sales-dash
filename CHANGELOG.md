@@ -89,3 +89,10 @@
 
 **Implementation:**
 - `vercel.json`: a catch-all rewrite (`/(.*)` → `/index.html`). Vercel's static file server only knows about actual files on disk (just `index.html` for a Vite SPA build) — without the rewrite, any path other than `/` 404s before `react-router-dom` (`BrowserRouter`) ever gets a chance to render the matching route client-side. Verified the rewrite doesn't shadow real static assets (JS/CSS under `/assets/`), which Vercel's build output still serves via filesystem lookup ahead of the rewrite.
+
+## 2026-08-16 — Add catch-all route redirecting unrecognized paths to / (`3c2a1a6`)
+
+**Objective:** Once the Vercel rewrite (previous entry) started routing every unmatched path to the SPA shell instead of a server 404, a genuinely nonexistent path (e.g. a typo) had nowhere left to land: `react-router-dom` had no matching `<Route>` and silently rendered nothing, logging "No routes matched location" with a blank body.
+
+**Implementation:**
+- `src/App.tsx`: adds a wildcard `<Route path="*" element={<Navigate to="/" replace />} />` as the last route, outside the `RequireGuest`/`RequireAuth` layout routes. An unmatched path now resolves to `/` — Login if signed out, or straight on to `/dashboard` via `RequireGuest`'s existing redirect if already authenticated.
