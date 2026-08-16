@@ -64,3 +64,12 @@
 - `src/pages/SignUp.tsx`: mirrors `Login.tsx`'s `useActionState` form pattern — email, password, and confirm-password fields, validated client-side (required fields, password match) before calling `supabase.auth.signUp`. Local auth has `enable_confirmations = false`, so signup returns an active session immediately and the form redirects straight to `/dashboard`, same as sign-in.
 - `src/App.tsx`: `/register` is nested inside the existing `RequireGuest` layout route alongside `/`, so an already-authenticated user hitting `/register` is redirected to `/dashboard`.
 - `src/pages/Login.tsx`: adds a "Sign up" link to `/register`; `SignUp.tsx` links back to `/` ("Sign in"), so neither auth page is a dead end.
+
+## 2026-08-16 — Enable RLS on public schema, scoped to authenticated only (`c54f8b4`)
+
+**Objective:** Close the Data API — which had been open to unauthenticated (`anon`) callers since the tables were first exposed — down to `authenticated`-only, per the security advisor's `rls_disabled_in_public` and `security_definer_view` findings.
+
+**Implementation:**
+- `supabase/migrations/20260816125023_rls_authenticated_only.sql`: enables RLS on `sales_deals` with blanket `authenticated`-only `SELECT`/`INSERT` policies (no per-owner filtering — the table has no ownership column, it's a shared dataset), fixes `sales_by_name` to run with `security_invoker` so it respects that RLS instead of bypassing it as the view owner, and revokes `anon`'s grants on both entirely rather than relying on RLS alone to filter it out.
+- `tests/testAuth.ts` (new) and the restructured `tests/salesDeals.test.ts`/`tests/salesByName.test.ts`: each file now has an "as anon" suite asserting the query is denied with Postgres error `42501`, followed by an "as authenticated" suite running the original assertions against a dedicated test-only account created via `supabase.auth.signUp` (falling back from `signInWithPassword` on first run, since there's no known password for the seeded demo users).
+- `vitest.config.ts`: sets `fileParallelism: false` — both files' authenticated suites sign in as the same test account, which raced under the default parallel-file execution.
