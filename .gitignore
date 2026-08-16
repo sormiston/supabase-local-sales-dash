@@ -22,6 +22,7 @@ dist-ssr
 .idea
 .DS_Store
 supabase/.temp
+.vercel
 *.suo
 *.ntvs*
 *.njsproj
