@@ -8,12 +8,13 @@ interface FormState {
 
 const initialState: FormState = { error: null }
 
-export function Login() {
+export function SignUp() {
   const navigate = useNavigate()
 
-  async function signIn(_prevState: FormState, formData: FormData): Promise<FormState> {
+  async function signUp(_prevState: FormState, formData: FormData): Promise<FormState> {
     const email = formData.get('email')
     const password = formData.get('password')
+    const confirmPassword = formData.get('confirmPassword')
 
     if (typeof email !== 'string' || email === '') {
       return { error: 'Enter your email.' }
@@ -23,7 +24,11 @@ export function Login() {
       return { error: 'Enter your password.' }
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (password !== confirmPassword) {
+      return { error: 'Passwords do not match.' }
+    }
+
+    const { error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       return { error: error.message }
@@ -33,7 +38,7 @@ export function Login() {
     return { error: null }
   }
 
-  const [state, formAction, isPending] = useActionState(signIn, initialState)
+  const [state, formAction, isPending] = useActionState(signUp, initialState)
 
   return (
     <div className="bg-page flex min-h-screen items-center justify-center">
@@ -63,26 +68,40 @@ export function Login() {
             id="password"
             name="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             required
             className="border-border bg-page text-ink-primary focus:border-series-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
           />
         </div>
 
-        {state.error && <p className="text-sm text-red-600">Couldn't sign in: {state.error}</p>}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="confirmPassword" className="text-ink-secondary text-sm">
+            Confirm password
+          </label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            required
+            className="border-border bg-page text-ink-primary focus:border-series-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
+          />
+        </div>
+
+        {state.error && <p className="text-sm text-red-600">Couldn't sign up: {state.error}</p>}
 
         <button
           type="submit"
           disabled={isPending}
           className="bg-series-1 rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isPending ? 'Signing in…' : 'Sign in'}
+          {isPending ? 'Signing up…' : 'Sign up'}
         </button>
 
         <p className="text-ink-secondary text-center text-sm">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-series-1 hover:underline">
-            Sign up
+          Already have an account?{' '}
+          <Link to="/" className="text-series-1 hover:underline">
+            Sign in
           </Link>
         </p>
       </form>

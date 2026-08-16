@@ -55,3 +55,12 @@
 - `src/pages/Login.tsx`: a `useActionState` form (mirroring `AddSalesDealForm`'s pattern) calling `supabase.auth.signInWithPassword`. `src/components/AppHeader.tsx` now shows the signed-in user's email and a sign-out control.
 - `AddSalesDealForm`/`SalesByNameChart`/`useSalesByName` take a `loading` flag so the "no reps yet" / "no sales data yet" empty states don't flash before the initial fetch resolves.
 - `supabase/seed.sql` and `package.json`'s `db:generate-seed`: the dump now includes `-s public,auth` with every ephemeral/session `auth.*` table (tokens, MFA, SSO, audit log, etc.) excluded, so `supabase db reset` reseeds two demo accounts (`alice@salesdash.com`, `john@salesdash.com`) alongside the sales data.
+
+## 2026-08-16 — Sign-up page at /register (`6baae75`)
+
+**Objective:** Let new users create an account from the UI instead of only signing in with pre-seeded demo accounts.
+
+**Implementation:**
+- `src/pages/SignUp.tsx`: mirrors `Login.tsx`'s `useActionState` form pattern — email, password, and confirm-password fields, validated client-side (required fields, password match) before calling `supabase.auth.signUp`. Local auth has `enable_confirmations = false`, so signup returns an active session immediately and the form redirects straight to `/dashboard`, same as sign-in.
+- `src/App.tsx`: `/register` is nested inside the existing `RequireGuest` layout route alongside `/`, so an already-authenticated user hitting `/register` is redirected to `/dashboard`.
+- `src/pages/Login.tsx`: adds a "Sign up" link to `/register`; `SignUp.tsx` links back to `/` ("Sign in"), so neither auth page is a dead end.
