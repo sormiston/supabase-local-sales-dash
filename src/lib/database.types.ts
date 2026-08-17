@@ -13,20 +13,56 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          name: string
+          rep_id: string
           value: number
         }
         Insert: {
           created_at?: string
           id?: number
-          name: string
+          rep_id: string
           value: number
         }
         Update: {
           created_at?: string
           id?: number
-          name?: string
+          rep_id?: string
           value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_deals_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_by_name"
+            referencedColumns: ["rep_id"]
+          },
+          {
+            foreignKeyName: "sales_deals_rep_id_fkey"
+            columns: ["rep_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          role?: string
         }
         Relationships: []
       }
@@ -36,13 +72,18 @@ export type Database = {
         Row: {
           deal_count: number | null
           name: string | null
+          rep_id: string | null
           total_value: number | null
         }
         Relationships: []
       }
     }
     Functions: {
-      [_ in never]: never
+      is_team_lead: { Args: never; Returns: boolean }
+      set_user_role: {
+        Args: { new_role: string; target_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

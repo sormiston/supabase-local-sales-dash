@@ -34,12 +34,12 @@ describe('sales_deals', () => {
     it('includes a known seed row', async () => {
       const { data, error } = await client
         .from('sales_deals')
-        .select('name, value')
+        .select('rep_id, value')
         .eq('id', 1)
         .single()
 
       expect(error).toBeNull()
-      expect(data).toEqual({ name: 'John', value: 3000 })
+      expect(data).toEqual({ rep_id: '9f3ee674-d2e8-42e6-8191-02cf66be6116', value: 3000 })
     })
   })
 })
