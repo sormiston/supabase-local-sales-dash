@@ -112,3 +112,19 @@
 
 **Remaining work (deliberately out of scope for this change):**
 - `src/components/AddSalesDealForm.tsx` still references the dropped `name` column/shape — needs its rep-selection UI rebuilt against `rep_id` (per the tightened insert policy, a user can only log deals for themselves, so the plan is to drop the rep dropdown and submit the signed-in user's own `rep_id` automatically) and `src/pages/Dashboard.tsx`'s prop wiring updated to match.
+
+## 2026-08-17 — Team-lead-gated invite flow replaces self-service sign-up (`TBD`)
+
+**Objective:** Move account creation off self-service sign-up onto a server-side, team-lead-only invite flow that pre-assigns the role rather than trusting the client, using the `user_profiles`/role groundwork from the previous entry.
+
+**Implementation:**
+- `supabase/functions/invite-user/index.ts` (new Edge Function): the only place `role` is ever set. Verifies the caller's JWT and calls `is_team_lead()` via RPC before doing anything (403 otherwise), then uses the service_role key to call `auth.admin.inviteUserByEmail()` (only `full_name` goes into user metadata — never `role`, since metadata is user-editable later) and writes the `user_profiles` row directly, bypassing RLS. Required an explicit `GRANT ... TO service_role` on `user_profiles` (added in the previous entry's migration) — `service_role`'s `BYPASSRLS` attribute skips policy checks but not the base SQL privilege system, which this project's tables don't get by default (same pattern already seen with `sales_deals`' separately-granted `SELECT`/`INSERT`).
+- `src/App.tsx`: removes the `/register` route entirely; adds `/team-lead/invite` nested inside a new `RequireTeamLead` layout guard (`src/components/RequireTeamLead.tsx`, mirroring the existing `RequireAuth`/`RequireGuest` pattern) rendering the new `src/pages/InviteTeamMembers.tsx` form, which calls the Edge Function via `supabase.functions.invoke('invite-user', ...)`.
+- `src/pages/Login.tsx`: removes the now-dead "Sign up" link to `/register`.
+- `.vscode/extensions.json`: adds the `denoland.vscode-deno` recommendation, needed for editing the new Deno-based Edge Function.
+
+**Verification:** Confirmed via HTTP against the locally-served Edge Function that a non-team-lead's invite request returns `403` and a team lead's returns `200` with a real `user_profiles` row created at the correct role. `tsc -b` confirms `App.tsx`/`Login.tsx`/`InviteTeamMembers.tsx`/`RequireTeamLead.tsx` compile cleanly against the regenerated types.
+
+**Remaining work (deliberately out of scope for this change):**
+- `src/pages/SignUp.tsx` is now dead code (unrouted but not deleted); no UI yet exists for listing or promoting/demoting existing team members beyond the bare invite form.
+- strongly consider refactoring the boolean isTeamLead privilege gate to a pattern of [Custom Claims and Role Based Access Control with enumerated role permissions](https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac)

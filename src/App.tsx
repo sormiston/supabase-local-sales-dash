@@ -1,8 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Dashboard } from '@/pages/Dashboard'
+import { InviteTeamMembers } from '@/pages/InviteTeamMembers'
 import { Login } from '@/pages/Login'
-import { SignUp } from '@/pages/SignUp'
 import { AppHeader } from '@/components/AppHeader'
+import { RequireTeamLead } from '@/components/RequireTeamLead'
 import { RequireAuth } from '@/components/RequireAuth'
 import { RequireGuest } from '@/components/RequireGuest'
 
@@ -13,10 +14,12 @@ function App() {
       <Routes>
         <Route element={<RequireGuest />}>
           <Route path="/" element={<Login />} />
-          <Route path="/register" element={<SignUp />} />
         </Route>
         <Route element={<RequireAuth />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route element={<RequireTeamLead />}>
+            <Route path="/team-lead/invite" element={<InviteTeamMembers />} />
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

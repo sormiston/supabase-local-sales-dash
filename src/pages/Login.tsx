@@ -1,5 +1,5 @@
 import { useActionState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabaseClient'
 
 interface FormState {
@@ -78,13 +78,6 @@ export function Login() {
         >
           {isPending ? 'Signing in…' : 'Sign in'}
         </button>
-
-        <p className="text-ink-secondary text-center text-sm">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-series-1 hover:underline">
-            Sign up
-          </Link>
-        </p>
       </form>
     </div>
   )
