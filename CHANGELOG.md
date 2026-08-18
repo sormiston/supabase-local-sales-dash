@@ -141,3 +141,13 @@
 - `vitest.config.ts`: widens `envPrefix` in this vitest-only config (not the app's `vite.config.ts` build) so the new `SUPABASE_SECRET_KEY` is readable via `import.meta.env` in tests without becoming statically replaceable in the shipped app bundle; `.env.example`/`.env.test` document the key, scoped explicitly to test cleanup.
 
 **Verification:** `pnpm test` (17/17 passing), run against both the current local DB and a fresh `supabase db reset`, and repeated back-to-back to confirm no state leaks between runs. `tsc -p tsconfig.test.json` and `oxfmt --check` clean on all touched files.
+
+## 2026-08-18 — Team leads can insert/update/delete any sales_deals row (`TBD`)
+
+**Objective:** Close a gap the tests above surfaced: `sales_deals` `INSERT` was rep-only, and `UPDATE`/`DELETE` had no grant or policy at all, so a team lead had no way to log or correct a deal on someone else's behalf.
+
+**Implementation:**
+- `supabase/migrations/20260818110000_team_lead_manage_any_sales_deals.sql`: adds an additive `team_lead_insert_any_sales_deals` policy alongside the existing rep-only one (Postgres ORs permissive policies), and grants `UPDATE`/`DELETE` to `authenticated` for the first time, restricted to team leads via new `team_lead_update_any_sales_deals`/`team_lead_delete_any_sales_deals` policies — reps hold the grant but have no matching policy, so their own `UPDATE`/`DELETE` attempts still affect 0 rows.
+- `tests/salesDeals.test.ts`: covers a team lead inserting/updating/deleting a deal on another rep's behalf, plus a negative check that a rep still can't touch their own seeded deal via `UPDATE`/`DELETE`.
+
+**Verification:** `pnpm test` (20/20 passing), against both current state and a fresh `supabase db reset`.
