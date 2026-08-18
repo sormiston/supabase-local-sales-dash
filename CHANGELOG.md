@@ -128,3 +128,16 @@
 **Remaining work (deliberately out of scope for this change):**
 - `src/pages/SignUp.tsx` is now dead code (unrouted but not deleted); no UI yet exists for listing or promoting/demoting existing team members beyond the bare invite form.
 - strongly consider refactoring the boolean isTeamLead privilege gate to a pattern of [Custom Claims and Role Based Access Control with enumerated role permissions](https://supabase.com/docs/guides/api/custom-claims-and-role-based-access-control-rbac)
+
+## 2026-08-18 — Integration test coverage for `user_profiles`/`rep_id` RLS and RPCs (`TBD`)
+
+**Objective:** Add automated coverage for the RLS policies, column-level grant, and `set_user_role()`/`is_team_lead()` RPCs introduced by the `user_profiles`/`rep_id` migration pair (two entries above), which had previously only been verified by hand via direct SQL.
+
+**Implementation:**
+- `tests/testAuth.ts`: replaces the single throwaway `createAuthenticatedClient()` with `createAuthenticatedRepClient()`/`createAuthenticatedTeamLeadClient()`, signing in as the seeded Alice (`team_lead`) and John (`rep`) demo accounts (every seeded demo user's password is `<name>123`). Also adds `createServiceRoleClient()`, used only to tear down rows a test itself created that `authenticated` has no grant to touch, never to assert RLS behavior.
+- `supabase/migrations/20260818090000_grant_service_role_sales_deals.sql`: a real gap found while wiring up that cleanup client — `sales_deals` never received the `service_role` CRUD grant that `user_profiles` already has; the original `first.sql` migration only granted `references`/`trigger`/`truncate` to `service_role`, so `service_role` was hitting `42501` too. Grants `SELECT`/`INSERT`/`UPDATE`/`DELETE` to `service_role`, matching the pattern already established for `user_profiles`.
+- `tests/userProfiles.test.ts` (new): anon denied by RLS; an authenticated rep can read every profile (open-read policy) but can only update its own `full_name` — not another user's row, and not its own `role`, since the column-level grant blocks that at the privilege layer independent of RLS; `is_team_lead()`/`set_user_role()` exercised from both roles — a rep gets `false`/`not authorized`, a team lead gets `true` and can change another user's role (reverted after each assertion so the suite stays idempotent across repeated local runs), and an invalid role is rejected.
+- `tests/salesDeals.test.ts`: adds insert-policy coverage — a rep can insert a deal under their own `rep_id` but not under someone else's (`42501`), confirming the migration's tightened `WITH CHECK (auth.uid() = rep_id)`.
+- `vitest.config.ts`: widens `envPrefix` in this vitest-only config (not the app's `vite.config.ts` build) so the new `SUPABASE_SECRET_KEY` is readable via `import.meta.env` in tests without becoming statically replaceable in the shipped app bundle; `.env.example`/`.env.test` document the key, scoped explicitly to test cleanup.
+
+**Verification:** `pnpm test` (17/17 passing), run against both the current local DB and a fresh `supabase db reset`, and repeated back-to-back to confirm no state leaks between runs. `tsc -p tsconfig.test.json` and `oxfmt --check` clean on all touched files.
