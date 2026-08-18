@@ -8,15 +8,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import type { Database } from '@/lib/database.types'
-
-type SalesByNameRow = Database['public']['Views']['sales_by_name']['Row']
 
 const numberFormatter = new Intl.NumberFormat('en-US')
 
 interface ChartTooltipProps {
   active?: boolean
-  payload?: { payload: SalesByNameRow }[]
+  payload?: { payload: { name: string; value: number; dealCount: number } }[]
 }
 
 function ChartTooltip({ active, payload }: ChartTooltipProps) {
@@ -28,23 +25,22 @@ function ChartTooltip({ active, payload }: ChartTooltipProps) {
     <div className="border-border bg-surface rounded-md border px-3 py-2 shadow-sm">
       <p className="text-ink-secondary text-sm">{row.name}</p>
       <p className="text-ink-primary text-base font-semibold">
-        {numberFormatter.format(row.total_value ?? 0)}
+        {numberFormatter.format(row.value ?? 0)}
       </p>
       <p className="text-ink-muted text-xs">
-        {row.deal_count} {row.deal_count === 1 ? 'deal' : 'deals'}
+        {row.dealCount} {row.dealCount === 1 ? 'deal' : 'deals'}
       </p>
     </div>
   )
 }
 
 interface SalesByNameChartProps {
-  data: SalesByNameRow[]
+  data: { name: string; value: number; dealCount: number }[]
   loading: boolean
   error: string | null
 }
 
 export function SalesByNameChart({ data, loading, error }: SalesByNameChartProps) {
-  console.log('data, loading, error: ', data, loading, error);
   // if (loading && data.length === 0) {
   //   return <p className="text-ink-secondary text-sm h-80 w-full">Loading sales data…</p>
   // }
@@ -80,13 +76,13 @@ export function SalesByNameChart({ data, loading, error }: SalesByNameChartProps
             cursor={{ fill: 'var(--color-ink-primary)', fillOpacity: 0.04 }}
           />
           <Bar
-            dataKey="total_value"
+            dataKey="value"
             fill="var(--color-series-1)"
             radius={[4, 4, 0, 0]}
             maxBarSize={24}
           >
             <LabelList
-              dataKey="total_value"
+              dataKey="value"
               position="top"
               formatter={(value: string | number | boolean | null | undefined) =>
                 typeof value === 'number' ? numberFormatter.format(value) : value

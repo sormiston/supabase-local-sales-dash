@@ -1,8 +1,5 @@
 import { useActionState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import type { Database } from '@/lib/database.types'
-
-type SalesByNameRow = Database['public']['Views']['sales_by_name']['Row']
 
 interface FormState {
   error: string | null
@@ -11,20 +8,18 @@ interface FormState {
 const initialState: FormState = { error: null }
 
 interface AddSalesDealFormProps {
-  data: SalesByNameRow[]
+  data: { name: string; repId: string }[]
   loading: boolean
 }
 
 export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
-  const repNames = Array.from(
-    new Set(data.map((row) => row.name).filter((name): name is string => Boolean(name))),
-  ).sort((a, b) => a.localeCompare(b))
+  const sortedData = [...data].sort((a, b) => a.name.localeCompare(b.name))
 
   async function addDeal(_prevState: FormState, formData: FormData): Promise<FormState> {
-    const name = formData.get('name')
+    const repId = formData.get('rep')
     const rawValue = formData.get('value')
 
-    if (typeof name !== 'string' || name === '') {
+    if (typeof repId !== 'string' || repId === '') {
       return { error: 'Select a sales rep.' }
     }
 
@@ -33,7 +28,7 @@ export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
       return { error: 'Deal value must be a positive whole number.' }
     }
 
-    const { error } = await supabase.from('sales_deals').insert({ name, value })
+    const { error } = await supabase.from('sales_deals').insert({ rep_id: repId, value })
 
     if (error) {
       return { error: error.message }
@@ -44,7 +39,7 @@ export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
 
   const [state, formAction, isPending] = useActionState(addDeal, initialState)
 
-  if (!loading && repNames.length === 0) {
+  if (!loading && data.length === 0) {
     return (
       <div className="border-border bg-surface rounded-lg border p-4">
         <p className="text-ink-secondary text-sm">
@@ -61,12 +56,12 @@ export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
       className="border-border bg-surface flex flex-col gap-4 rounded-lg border p-4"
     >
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="rep-name" className="text-ink-secondary text-sm">
+        <label htmlFor="rep" className="text-ink-secondary text-sm">
           Sales rep
         </label>
         <select
-          id="rep-name"
-          name="name"
+          id="rep"
+          name="rep"
           required
           defaultValue=""
           className="border-border bg-page text-ink-primary focus:border-series-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
@@ -74,8 +69,8 @@ export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
           <option value="" disabled>
             Select a rep…
           </option>
-          {repNames.map((name) => (
-            <option key={name} value={name}>
+          {sortedData.map(({ name, repId }) => (
+            <option key={repId} value={repId}>
               {name}
             </option>
           ))}

@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import type { Database } from '@/lib/database.types'
 
-type SalesByNameRow = Database['public']['Views']['sales_by_name']['Row']
+export type SalesByNameData = {
+  name: string
+  repId: string
+  value: number
+  dealCount: number
+}[]
 
-interface UseSalesByNameResult {
-  data: SalesByNameRow[]
-  loading: boolean
-  error: string | null
-}
-
-export function useSalesByName(): UseSalesByNameResult {
-  const [data, setData] = useState<SalesByNameRow[]>([])
+export function useSalesByName() {
+  const [data, setData] = useState<SalesByNameData>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,6 +28,10 @@ export function useSalesByName(): UseSalesByNameResult {
       const { data: rows, error: fetchError } = await supabase
         .from('sales_by_name')
         .select('*')
+        .not('name', 'is', null)
+        .not('rep_id', 'is', null)
+        .not('total_value', 'is', null)
+        .not('deal_count', 'is', null)
         .abortSignal(controller.signal)
 
       if (controller.signal.aborted || cancelled) return
@@ -37,7 +39,13 @@ export function useSalesByName(): UseSalesByNameResult {
       if (fetchError) {
         setError(fetchError.message)
       } else {
-        setData(rows ?? [])
+        const normalized: SalesByNameData = rows.map((row) => ({
+          name: row.name,
+          repId: row.rep_id,
+          value: row.total_value,
+          dealCount: row.deal_count,
+        }))
+        setData(normalized)
       }
       setLoading(false)
     }
