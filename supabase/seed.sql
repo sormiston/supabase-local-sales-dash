@@ -4,7 +4,7 @@ SET session_replication_role = replica;
 -- PostgreSQL database dump
 --
 
--- \restrict OMvq62mGreRNpOdHkWcOgrlNgh47MFET9qJMjDgoMpxLlUxlPNAGJTzX7ZQEMXq
+-- \restrict Rqe4yu1Zp79JcZah0gPamnhXXYahOGLKBTG1aRcSD9zkRAXiUvGbg6Ijm9iled4
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -26,63 +26,56 @@ SET row_security = off;
 --
 
 INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous") VALUES
-	('00000000-0000-0000-0000-000000000000', 'd0e6c672-7b30-492e-a889-1ea5bb384a60', 'authenticated', 'authenticated', 'alice@salesdash.com', '$2a$10$l2iXnOxPdZocBzSwiz2aNuE6zqKqBsvbeAVxsK3r58dft0tbbOvD.', '2026-08-15 22:23:50.480193+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true, "full_name": "Alice"}', NULL, '2026-08-15 22:23:50.477317+00', '2026-08-15 22:23:50.480603+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
-	('00000000-0000-0000-0000-000000000000', '9f3ee674-d2e8-42e6-8191-02cf66be6116', 'authenticated', 'authenticated', 'john@salesdash.com', '$2a$10$hoQ3tDTM9Ro2KhtI2EKNSufjrCIrfghLQZe6HwyDE6nkIkH4XwdWq', '2026-08-15 22:23:36.76913+00', NULL, '', NULL, '', NULL, '', '', NULL, '2026-08-16 10:26:19.034681+00', '{"provider": "email", "providers": ["email"]}', '{"email_verified": true, "full_name": "John"}', NULL, '2026-08-15 22:23:36.753114+00', '2026-08-16 10:26:19.036911+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
-	('00000000-0000-0000-0000-000000000000', 'bc9c349b-b342-4bf4-a533-ece67c059374', 'authenticated', 'authenticated', 'marcus@salesdash.com', extensions.crypt('salesdash-seed-password', extensions.gen_salt('bf')), now(), NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true, "full_name": "Marcus"}', NULL, now(), now(), NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
-	('00000000-0000-0000-0000-000000000000', 'd1944b6d-099b-4b95-9434-eab83aeeb215', 'authenticated', 'authenticated', 'priya@salesdash.com', extensions.crypt('salesdash-seed-password', extensions.gen_salt('bf')), now(), NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true, "full_name": "Priya"}', NULL, now(), now(), NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+	('00000000-0000-0000-0000-000000000000', 'bc9c349b-b342-4bf4-a533-ece67c059374', 'authenticated', 'authenticated', 'marcus@salesdash.com', '$2a$06$.FOoQzQTK3yNkI5dcp60RupH.Y93GH8BCfyL78N.oNvxGHDofDejS', '2026-08-19 11:01:16.949984+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"full_name": "Marcus", "email_verified": true}', NULL, '2026-08-19 11:01:16.949984+00', '2026-08-19 11:01:16.949984+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
+	('00000000-0000-0000-0000-000000000000', 'd1944b6d-099b-4b95-9434-eab83aeeb215', 'authenticated', 'authenticated', 'priya@salesdash.com', '$2a$06$VVC47GCR5t5VpRr2ymVru.iR5VaX6xREy.3Ml6DQ3QH8RWnmvXf/a', '2026-08-19 11:01:16.949984+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"full_name": "Priya", "email_verified": true}', NULL, '2026-08-19 11:01:16.949984+00', '2026-08-19 11:01:16.949984+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
+	('00000000-0000-0000-0000-000000000000', 'd0e6c672-7b30-492e-a889-1ea5bb384a60', 'authenticated', 'authenticated', 'alice@salesdash.com', '$2a$10$l2iXnOxPdZocBzSwiz2aNuE6zqKqBsvbeAVxsK3r58dft0tbbOvD.', '2026-08-15 22:23:50.480193+00', NULL, '', NULL, '', NULL, '', '', NULL, '2026-08-19 14:55:13.146669+00', '{"provider": "email", "providers": ["email"]}', '{"full_name": "Alice", "email_verified": true}', NULL, '2026-08-15 22:23:50.477317+00', '2026-08-19 14:55:13.148862+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
+	('00000000-0000-0000-0000-000000000000', '9f3ee674-d2e8-42e6-8191-02cf66be6116', 'authenticated', 'authenticated', 'john@salesdash.com', '$2a$10$hoQ3tDTM9Ro2KhtI2EKNSufjrCIrfghLQZe6HwyDE6nkIkH4XwdWq', '2026-08-15 22:23:36.76913+00', NULL, '', NULL, '', NULL, '', '', NULL, '2026-08-19 14:55:13.461076+00', '{"provider": "email", "providers": ["email"]}', '{"role": "rep", "full_name": "John", "email_verified": true}', NULL, '2026-08-15 22:23:36.753114+00', '2026-08-19 14:55:13.46418+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
 
 
 --
 -- Data for Name: user_profiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
--- Inserted explicitly: SET session_replication_role = replica (above) means
--- no trigger runs during this load, so the on_auth_user_created trigger (see
--- 20260819090000_handle_new_user_trigger.sql) that normally creates these
--- rows on auth.users insert is bypassed here -- the explicit insert below
--- stands in for it. Alice is seeded as the sole team lead since the invite
--- flow requires an existing team lead caller to bootstrap from.
---
 
-INSERT INTO "public"."user_profiles" ("id", "full_name", "role") VALUES
-	('d0e6c672-7b30-492e-a889-1ea5bb384a60', 'Alice', 'team_lead'),
-	('9f3ee674-d2e8-42e6-8191-02cf66be6116', 'John', 'rep'),
-	('bc9c349b-b342-4bf4-a533-ece67c059374', 'Marcus', 'rep'),
-	('d1944b6d-099b-4b95-9434-eab83aeeb215', 'Priya', 'rep');
+INSERT INTO "public"."user_profiles" ("id", "full_name", "role", "created_at") VALUES
+	('d0e6c672-7b30-492e-a889-1ea5bb384a60', 'Alice', 'team_lead', '2026-08-19 11:01:16.949984+00'),
+	('bc9c349b-b342-4bf4-a533-ece67c059374', 'Marcus', 'rep', '2026-08-19 11:01:16.949984+00'),
+	('d1944b6d-099b-4b95-9434-eab83aeeb215', 'Priya', 'rep', '2026-08-19 11:01:16.949984+00'),
+	('9f3ee674-d2e8-42e6-8191-02cf66be6116', 'John', 'rep', '2026-08-19 11:01:16.949984+00');
 
 
 --
 -- Data for Name: sales_deals; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."sales_deals" ("id", "created_at", "rep_id", "value") VALUES
-	(1, '2026-08-06 17:59:07.805745+00', '9f3ee674-d2e8-42e6-8191-02cf66be6116', 3000),
-	(2, '2026-08-11 19:39:05.722117+00', 'd0e6c672-7b30-492e-a889-1ea5bb384a60', 4200),
-	(3, '2026-08-11 19:39:05.722117+00', 'bc9c349b-b342-4bf4-a533-ece67c059374', 1800),
-	(4, '2026-08-11 19:39:05.722117+00', 'd1944b6d-099b-4b95-9434-eab83aeeb215', 5600),
-	(5, '2026-08-11 19:39:05.722117+00', '9f3ee674-d2e8-42e6-8191-02cf66be6116', 2500),
-	(7, '2026-08-11 19:39:05.722117+00', 'bc9c349b-b342-4bf4-a533-ece67c059374', 900),
-	(8, '2026-08-11 19:39:05.722117+00', 'd1944b6d-099b-4b95-9434-eab83aeeb215', 4700),
-	(6, '2026-08-11 19:39:05.722117+00', 'bc9c349b-b342-4bf4-a533-ece67c059374', 3100);
+INSERT INTO "public"."sales_deals" ("id", "created_at", "value", "rep_id") VALUES
+	(1, '2026-08-06 17:59:07.805745+00', 3000, '9f3ee674-d2e8-42e6-8191-02cf66be6116'),
+	(2, '2026-08-11 19:39:05.722117+00', 4200, 'd0e6c672-7b30-492e-a889-1ea5bb384a60'),
+	(3, '2026-08-11 19:39:05.722117+00', 1800, 'bc9c349b-b342-4bf4-a533-ece67c059374'),
+	(4, '2026-08-11 19:39:05.722117+00', 5600, 'd1944b6d-099b-4b95-9434-eab83aeeb215'),
+	(5, '2026-08-11 19:39:05.722117+00', 2500, '9f3ee674-d2e8-42e6-8191-02cf66be6116'),
+	(7, '2026-08-11 19:39:05.722117+00', 900, 'bc9c349b-b342-4bf4-a533-ece67c059374'),
+	(8, '2026-08-11 19:39:05.722117+00', 4700, 'd1944b6d-099b-4b95-9434-eab83aeeb215'),
+	(6, '2026-08-11 19:39:05.722117+00', 3100, 'bc9c349b-b342-4bf4-a533-ece67c059374');
 
 
 --
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 6, true);
+SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 85, true);
 
 
 --
 -- Name: sales_deals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"public"."sales_deals_id_seq"', 13, true);
+SELECT pg_catalog.setval('"public"."sales_deals_id_seq"', 28, true);
 
 
 --
 -- PostgreSQL database dump complete
 --
 
--- \unrestrict OMvq62mGreRNpOdHkWcOgrlNgh47MFET9qJMjDgoMpxLlUxlPNAGJTzX7ZQEMXq
+-- \unrestrict Rqe4yu1Zp79JcZah0gPamnhXXYahOGLKBTG1aRcSD9zkRAXiUvGbg6Ijm9iled4
 
 RESET ALL;
