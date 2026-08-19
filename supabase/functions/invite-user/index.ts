@@ -1,8 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
+import { corsHeaders } from '@supabase/supabase-js/cors'
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return Response.json({ ok: true }, { headers: corsHeaders })
+  }
+
   const authHeader = req.headers.get('Authorization')
-  if (!authHeader) return new Response('Unauthorized', { status: 401 })
+  if (!authHeader) return new Response('Unauthorized', { status: 401, headers: corsHeaders })
 
   const callerClient = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -13,14 +18,14 @@ Deno.serve(async (req) => {
   const {
     data: { user },
   } = await callerClient.auth.getUser()
-  if (!user) return new Response('Unauthorized', { status: 401 })
+  if (!user) return new Response('Unauthorized', { status: 401, headers: corsHeaders })
 
   const { data: isTeamLead } = await callerClient.rpc('is_team_lead')
-  if (!isTeamLead) return new Response('Forbidden', { status: 403 })
+  if (!isTeamLead) return new Response('Forbidden', { status: 403, headers: corsHeaders })
 
   const { email, fullName, role } = await req.json()
   if (!email || !fullName || !['rep', 'team_lead'].includes(role)) {
-    return new Response('Invalid request', { status: 400 })
+    return new Response('Invalid request', { status: 400, headers: corsHeaders })
   }
 
   const adminClient = createClient(
@@ -39,10 +44,10 @@ Deno.serve(async (req) => {
     data: { full_name: fullName, role },
   })
   if (inviteError) {
-    return new Response(inviteError.message, { status: 400 })
+    return new Response(inviteError.message, { status: 400, headers: corsHeaders })
   }
 
   return new Response(JSON.stringify({ ok: true }), {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
