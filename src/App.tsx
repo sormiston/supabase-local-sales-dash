@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { AcceptInvite } from '@/pages/AcceptInvite'
 import { Dashboard } from '@/pages/Dashboard'
 import { InviteTeamMembers } from '@/pages/InviteTeamMembers'
 import { Login } from '@/pages/Login'
@@ -21,6 +22,7 @@ function App() {
             <Route path="/team-lead/invite" element={<InviteTeamMembers />} />
           </Route>
         </Route>
+        <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
