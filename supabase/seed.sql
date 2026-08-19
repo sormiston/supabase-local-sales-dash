@@ -36,10 +36,10 @@ INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encryp
 -- Data for Name: user_profiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 -- Inserted explicitly: SET session_replication_role = replica (above) means
--- no trigger runs during this load, and there is no auth.users trigger in
--- this schema anyway (see 20260817130000_create_user_profiles.sql) -- the
--- invite-user Edge Function is the only thing that creates these rows in
--- normal operation. Alice is seeded as the sole team lead since the invite
+-- no trigger runs during this load, so the on_auth_user_created trigger (see
+-- 20260819090000_handle_new_user_trigger.sql) that normally creates these
+-- rows on auth.users insert is bypassed here -- the explicit insert below
+-- stands in for it. Alice is seeded as the sole team lead since the invite
 -- flow requires an existing team lead caller to bootstrap from.
 --
 

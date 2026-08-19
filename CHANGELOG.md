@@ -151,3 +151,15 @@
 - `tests/salesDeals.test.ts`: covers a team lead inserting/updating/deleting a deal on another rep's behalf, plus a negative check that a rep still can't touch their own seeded deal via `UPDATE`/`DELETE`.
 
 **Verification:** `pnpm test` (20/20 passing), against both current state and a fresh `supabase db reset`.
+
+## 2026-08-19 — `user_profiles` rows are created by an `auth.users` trigger, not the invite Edge Function (`TBD`)
+
+**Objective:** `invite-user` was the only valid path for account creation, since it was the only code that inserted `user_profiles` rows. Decouple profile creation from that one Edge Function so any path that creates an `auth.users` row gets a profile automatically.
+
+**Implementation:**
+- `supabase/migrations/20260819090000_handle_new_user_trigger.sql`: adds `handle_new_user()` (`SECURITY DEFINER`) and an `AFTER INSERT ON auth.users` trigger that creates the matching `user_profiles` row from `raw_user_meta_data`'s `full_name`/`role` (defaulting `role` to `'rep'`).
+- `supabase/functions/invite-user/index.ts`: passes `role` into the invited user's metadata instead of inserting `user_profiles` directly. Safe because the trigger fires once, at creation, and `user_profiles.role` stays unwritable by the user afterward (existing self-update policy/grant), so a later `auth.updateUser()` metadata edit can't change it.
+- `tests/userProfiles.test.ts`: adds a regression test proving that guarantee — a rep updating their own metadata `role` does not change `user_profiles.role`.
+- `tests/inviteUser.test.ts`: updates the metadata assertion now that `role` is expected there.
+
+**Verification:** Confirmed the trigger fires independent of any application code via a direct `curl` call to GoTrue's admin API (bypassing `invite-user` entirely) and a `user_profiles` select. `pnpm test` (28/28 passing), run twice for idempotency, against both current state and a fresh `supabase db reset`.

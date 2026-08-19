@@ -28,23 +28,19 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
-  // Only full_name (harmless) goes into user_metadata via the invite --
-  // never role. user_metadata is user-editable later via auth.updateUser,
-  // so it must never be treated as authoritative for authorization.
-  const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
-    email,
-    { data: { full_name: fullName } },
-  )
-  if (inviteError || !invited.user) {
-    return new Response(inviteError?.message ?? 'Invite failed', { status: 400 })
+  // full_name and role both go into user_metadata: a database trigger
+  // (handle_new_user, on auth.users) reads them to create the matching
+  // user_profiles row itself. Safe despite user_metadata being user-editable
+  // later via auth.updateUser: the trigger only runs once, at creation, and
+  // role is gated on the caller being an existing team lead (checked above)
+  // -- from then on user_profiles.role is unwritable by the user themselves
+  // (see the trigger's migration), so a later metadata edit can't change it.
+  const { error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+    data: { full_name: fullName, role },
+  })
+  if (inviteError) {
+    return new Response(inviteError.message, { status: 400 })
   }
-
-  // Role is authoritative from this row, written directly with service_role
-  // (bypasses RLS), immediately after the auth.users row is created.
-  const { error: profileError } = await adminClient
-    .from('user_profiles')
-    .insert({ id: invited.user.id, full_name: fullName, role })
-  if (profileError) return new Response(profileError.message, { status: 500 })
 
   return new Response(JSON.stringify({ ok: true }), {
     headers: { 'Content-Type': 'application/json' },

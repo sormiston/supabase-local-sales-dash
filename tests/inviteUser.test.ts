@@ -32,7 +32,7 @@ describe('invite-user', () => {
   })
 
   describe('as team lead', () => {
-    it('invites a new rep, without leaking role into user metadata', async () => {
+    it('invites a new rep', async () => {
       const client = await createAuthenticatedTeamLeadClient()
       const serviceClient = createServiceRoleClient()
       const email = freshEmail()
@@ -49,7 +49,7 @@ describe('invite-user', () => {
       } = await serviceClient.auth.admin.listUsers({ perPage: 1000 })
       const created = users.find((u) => u.email === email)
       expect(created).toBeDefined()
-      expect(created?.user_metadata).toEqual({ full_name: 'New Rep' })
+      expect(created?.user_metadata).toEqual({ full_name: 'New Rep', role: 'rep' })
 
       const { data: profile } = await serviceClient
         .from('user_profiles')
@@ -58,6 +58,7 @@ describe('invite-user', () => {
         .single()
       expect(profile).toEqual({ full_name: 'New Rep', role: 'rep' })
 
+      // rollback
       await serviceClient.auth.admin.deleteUser(created!.id)
     })
 
@@ -85,6 +86,7 @@ describe('invite-user', () => {
         .single()
       expect(profile?.role).toBe('team_lead')
 
+      // rollback
       await serviceClient.auth.admin.deleteUser(created!.id)
     })
 

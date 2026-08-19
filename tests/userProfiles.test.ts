@@ -75,6 +75,16 @@ describe('user_profiles', () => {
       expect(error?.code).toBe('42501')
     })
 
+    it("updating its own auth metadata role doesn't change user_profiles.role", async () => {
+      const { error: updateError } = await client.auth.updateUser({ data: { role: 'team_lead' } })
+      expect(updateError).toBeNull()
+
+      const { data } = await client.from('user_profiles').select('role').eq('id', REP_ID).single()
+      expect(data?.role).toBe('rep')
+
+      await client.auth.updateUser({ data: { role: 'rep' } })
+    })
+
     it('is_team_lead() returns false', async () => {
       const { data, error } = await client.rpc('is_team_lead')
 
