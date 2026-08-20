@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/context/AuthContext'
 
 export function AppHeader() {
-  const { session, loading } = useAuth()
+  const { session, profile, loading } = useAuth()
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -15,6 +15,11 @@ export function AppHeader() {
         {!loading && session && (
           <div className="flex items-center gap-4">
             <span className="text-ink-secondary text-sm">{session.user.email}</span>
+            {profile && (
+              <span className="border-border text-ink-secondary rounded-full border px-2 py-0.5 text-xs font-medium">
+                {profile.role === 'team_lead' ? 'Team Lead' : 'Rep'}
+              </span>
+            )}
             <button
               type="button"
               onClick={handleSignOut}

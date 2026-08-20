@@ -1,5 +1,7 @@
 import { useActionState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { useAuth } from '@/context/AuthContext'
+import { useTeamProfiles } from '@/hooks/useTeamProfiles'
 
 interface FormState {
   error: string | null
@@ -7,13 +9,10 @@ interface FormState {
 
 const initialState: FormState = { error: null }
 
-interface AddSalesDealFormProps {
-  data: { name: string; repId: string }[]
-  loading: boolean
-}
-
-export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
-  const sortedData = [...data].sort((a, b) => a.name.localeCompare(b.name))
+export function AddSalesDealForm() {
+  const { user, profile } = useAuth()
+  const { profiles: teamProfiles, loading: teamProfilesLoading } = useTeamProfiles()
+  const isTeamLead = profile?.role === 'team_lead'
 
   async function addDeal(_prevState: FormState, formData: FormData): Promise<FormState> {
     const repId = formData.get('rep')
@@ -39,7 +38,7 @@ export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
 
   const [state, formAction, isPending] = useActionState(addDeal, initialState)
 
-  if (!loading && data.length === 0) {
+  if (!teamProfilesLoading && teamProfiles.length === 0) {
     return (
       <div className="border-border bg-surface rounded-lg border p-4">
         <p className="text-ink-secondary text-sm">
@@ -59,22 +58,36 @@ export function AddSalesDealForm({ data, loading }: AddSalesDealFormProps) {
         <label htmlFor="rep" className="text-ink-secondary text-sm">
           Sales rep
         </label>
-        <select
-          id="rep"
-          name="rep"
-          required
-          defaultValue=""
-          className="border-border bg-page text-ink-primary focus:border-series-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
-        >
-          <option value="" disabled>
-            Select a rep…
-          </option>
-          {sortedData.map(({ name, repId }) => (
-            <option key={repId} value={repId}>
-              {name}
+        {isTeamLead ? (
+          <select
+            id="rep"
+            name="rep"
+            required
+            defaultValue=""
+            className="border-border bg-page text-ink-primary focus:border-series-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
+          >
+            <option value="" disabled>
+              Select a rep…
             </option>
-          ))}
-        </select>
+            {teamProfiles.map(({ id, fullName }) => (
+              <option key={id} value={id}>
+                {fullName}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <>
+            <select
+              id="rep"
+              disabled
+              value={user?.id ?? ''}
+              className="border-border bg-page text-ink-primary rounded-md border px-3 py-2 text-sm focus:outline-none disabled:opacity-70"
+            >
+              {user && profile && <option value={user.id}>{profile.fullName}</option>}
+            </select>
+            <input type="hidden" name="rep" value={user?.id ?? ''} />
+          </>
+        )}
       </div>
 
       <div className="flex flex-col gap-1.5">

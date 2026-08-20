@@ -23,7 +23,7 @@ export function Dashboard() {
         <SalesByNameChart data={data} loading={loading} error={error} />
 
         <h2 className="text-ink-primary mt-8 mb-4 text-lg font-medium">Add a deal</h2>
-        <AddSalesDealForm data={data} loading={loading} />
+        <AddSalesDealForm />
       </main>
     </div>
   )
